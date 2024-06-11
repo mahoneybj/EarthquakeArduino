@@ -10,11 +10,18 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
-model Institution {
-  id         Int          @id @default(autoincrement())
-  name       String
-  region     String
-  country    String
-  createdAt  DateTime     @default(now())
-  updatedAt  DateTime     @updatedAt
+model RawData {
+  id        Int      @id @default(autoincrement())
+  timestamp DateTime @default(now())
+  x         Decimal
+  y         Decimal
+  z         Decimal
+}
+
+model EarthquakeAlert {
+  id        Int     @id @default(autoincrement())
+  timestamp DateTime @default(now())
+  pwave     DateTime
+  swave     DateTime
+  max       Decimal
 }
