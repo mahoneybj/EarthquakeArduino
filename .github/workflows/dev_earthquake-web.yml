@@ -68,5 +68,5 @@ jobs:
         with:
           app-name: 'Earthquake-web'
           slot-name: 'Production'
-          app-settings: ${{ secrets.DATABASE_URL }}
+          connection-strings-json: '{"DATABASE_URL": "${{ secrets.DATABASE_URL }}"}'
 
