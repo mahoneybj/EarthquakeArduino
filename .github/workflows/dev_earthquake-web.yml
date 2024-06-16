@@ -63,10 +63,3 @@ jobs:
           publish-profile: ${{ secrets.AZUREAPPSERVICE_PUBLISHPROFILE_F84982E411AF47208D }}
           package: .
 
-      - name: 'Set app settings'
-        uses: azure/appservice-settings@v1
-        with:
-          app-name: 'Earthquake-web'
-          slot-name: 'Production'
-          connection-strings-json: '{"DATABASE_URL": "${{ secrets.DATABASE_URL }}"}'
-
