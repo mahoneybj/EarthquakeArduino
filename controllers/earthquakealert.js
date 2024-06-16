@@ -9,10 +9,7 @@ import e from "express";
 
 const prisma = new PrismaClient();
 
-const paginationDefault = {
-  amount: 25, // The number of items per page
-  page: 1, // The page number
-};
+
 
 const createEarthquakeAlert = async (req, res) => {
   try {
@@ -42,15 +39,7 @@ const createEarthquakeAlert = async (req, res) => {
 
 const getEarthquakeAlerts = async (req, res) => {
     try {
-    const query = {
-      take: Number(amount),
-      skip: (Number(page) - 1) * Number(amount),
-      orderBy: {
-        [sortBy]: sortOrder,
-      },
-    };
-
-    const earthquakeAlerts = await prisma.earthquakeAlert.findMany(query); // Fetch earthquake alert from the database using Prisma
+    const earthquakeAlerts = await prisma.earthquakeAlert.findMany(); // Fetch earthquake alert from the database using Prisma
 
     if (earthquakeAlerts.length === 0) {
       return res.status(404).json({ msg: "No alerts found" });
