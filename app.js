@@ -46,8 +46,8 @@ app.get("*", (req, res) => {
   });
   
   // Start the server on port 3000
-  app.listen(3000, () => {
-    console.log("Server is listening on port 3000.");
+  app.listen(8080, () => {
+    console.log("Server is listening on port 8080.");
   });
   
   // Export the Express application. Other modules may use it. For example, API testing

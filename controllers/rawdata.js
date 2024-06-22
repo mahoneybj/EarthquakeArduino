@@ -8,11 +8,6 @@ import { raw } from "@prisma/client/runtime/library";
 
 const prisma = new PrismaClient();
 
-const paginationDefault = {
-  amount: 25, // The number of items per page
-  page: 1, // The page number
-};
-
 const createRawData = async (req, res) => {
   try {
     const contentType = req.headers["content-type"];
@@ -41,15 +36,8 @@ const createRawData = async (req, res) => {
 
 const getRawDatas = async (req, res) => {
     try {
-    const query = {
-      take: Number(amount),
-      skip: (Number(page) - 1) * Number(amount),
-      orderBy: {
-        [sortBy]: sortOrder,
-      },
-    };
 
-    const rawDatas = await prisma.rawData.findMany(query); // Fetch rawdata data from the database using Prisma
+    const rawDatas = await prisma.rawData.findMany(); // Fetch rawdata data from the database using Prisma
 
     if (rawDatas.length === 0) {
       return res.status(404).json({ msg: "No data found" });
