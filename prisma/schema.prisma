@@ -22,7 +22,7 @@ model RawData {
 model EarthquakeAlert {
   id        Int     @id @default(autoincrement())
   timestamp DateTime @default(now())
-  pwave     DateTime
-  swave     DateTime
-  max       Decimal
+  pwave     Decimal
+  swave     Decimal
+  sensorid  Int
 }
