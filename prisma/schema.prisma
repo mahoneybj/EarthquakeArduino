@@ -25,4 +25,5 @@ model EarthquakeAlert {
   pwave     Decimal
   swave     Decimal
   sensorid  Int
+  active    Boolean
 }
