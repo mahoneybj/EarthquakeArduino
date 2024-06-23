@@ -5,8 +5,8 @@ import requests
 # Configuration
 serial_port = '/dev/ttyACM0'  # Change to your serial port
 baud_rate = 9600              # Change to your baud rate
-calibration_index = 10
-threshold = 0.3               # Deviation threshold to start capture period
+calibration_index = 50
+threshold = 0.05               # Deviation threshold to start capture period
 capture_duration = 3          # Capture period in seconds
 api_url = 'https://earthquake-web.azurewebsites.net/api/earthquake-alerts'
 sensor_id = 1
@@ -43,7 +43,7 @@ def read_serial_data(port, baud_rate, calibration_index, threshold, capture_dura
                             print(f"Calibration data captured: {calibration_data}")
                             print(f"Entering buffer period for {buffer_time} seconds.")
                             time.sleep(buffer_time)
-                            print("Buffer period ended. Starting to monitor for deviations.")
+                            print("Calibration period complete. Starting to monitor for shaking.")
                         elif calibration_data:
                             # Check for deviation
                             dx = abs(x - calibration_data[0])
@@ -51,7 +51,7 @@ def read_serial_data(port, baud_rate, calibration_index, threshold, capture_dura
                             dz = abs(z - calibration_data[2])
                             
                             if dx > threshold or dy > threshold or dz > threshold:
-                                print("Significant deviation detected. Starting capture period.")
+                                print("P-wave detected. Starting capture period (3 seconds).")
                                 p_wave = capture_peak(ser, calibration_data, capture_duration)
                                 print(f"P wave captured: {p_wave}")
                                 
@@ -59,7 +59,14 @@ def read_serial_data(port, baud_rate, calibration_index, threshold, capture_dura
                                 print(f"S wave captured: {s_wave}")
 
                                 # Send data to API
-                                send_to_api(p_wave, s_wave, sensor_id, api_url)
+                                alert_id = send_to_api(p_wave, s_wave, sensor_id, api_url)
+                                
+                                if alert_id:
+                                    # Wait for 5 seconds
+                                    print(f"Waiting for 5 seconds before updating alert {alert_id}...")
+                                    time.sleep(5)
+                                    # Update the alert to set 'active' to false
+                                    update_alert(alert_id, api_url)
                                 
                                 break
                     except ValueError:
@@ -124,16 +131,51 @@ def send_to_api(p_wave, s_wave, sensor_id, api_url):
     data = {
         'pwave': p_wave,
         'swave': s_wave,
-        'sensorid': sensor_id
+        'sensorid': sensor_id,
+        'active': True
     }
     try:
         response = requests.post(api_url, json=data)
         if response.status_code == 201:
             print("Data successfully sent to API.")
+            # Extract the latest alert ID from the response
+            response_data = response.json()
+            latest_alert_id = None
+            
+            if 'data' in response_data and len(response_data['data']) > 0:
+                for alert in response_data['data']:
+                    alert_id = alert.get('id')
+                    if alert_id is not None:
+                        if latest_alert_id is None or alert_id > latest_alert_id:
+                            latest_alert_id = alert_id
+            
+            if latest_alert_id is not None:
+                print(f"Latest Alert ID received: {latest_alert_id}")
+                return latest_alert_id
+            else:
+                print("No valid alert ID found in the response data.")
+                return None
         else:
             print(f"Failed to send data to API. Status code: {response.status_code}")
+            print(f"Response content: {response.content}")
+            return None
     except requests.exceptions.RequestException as e:
         print(f"Error sending data to API: {e}")
+        return None
+
+    
+def update_alert(alert_id, api_url):
+    update_url = f"{api_url}/{alert_id}"
+    data = {'active': False}
+    try:
+        response = requests.put(update_url, json=data)
+        if response.status_code == 200:
+            print(f"Alert {alert_id} successfully updated to inactive.")
+        else:
+            print(f"Failed to update alert {alert_id}. Status code: {response.status_code}")
+            print(f"Response content: {response.content}")
+    except requests.exceptions.RequestException as e:
+        print(f"Error updating alert {alert_id}: {e}")
 
 # Call the function and capture the calibration, P wave, and S wave data
 calibration_data, p_wave, s_wave = read_serial_data(serial_port, baud_rate, calibration_index, threshold, capture_duration, buffer_time)
