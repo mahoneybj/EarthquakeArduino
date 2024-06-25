@@ -26,4 +26,6 @@ model EarthquakeAlert {
   swave     Decimal
   sensorid  Int
   active    Boolean
+  time      Decimal
+  distance  Decimal
 }

@@ -17,6 +17,8 @@ CREATE TABLE "EarthquakeAlert" (
     "swave" DECIMAL(65,30) NOT NULL,
     "sensorid" INTEGER NOT NULL,
     "active" BOOLEAN NOT NULL,
+    "time" DECIMAL(65,30) NOT NULL,
+    "distance" DECIMAL(65,30) NOT NULL,
 
     CONSTRAINT "EarthquakeAlert_pkey" PRIMARY KEY ("id")
 );
